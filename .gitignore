@@ -1,1 +1,7 @@
 /bin/*
+/obj/*
+mmangold.com.csproj.user
+.vs/mmangold.com/v15/.suo
+.vs/mmangold.com/v15/Server/sqlite3/db.lock
+.vs/mmangold.com/v15/Server/sqlite3/storage.ide
+.vs/slnx.sqlite

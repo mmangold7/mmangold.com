@@ -2,3 +2,5 @@
 /obj/*
 mmangold.com.csproj.user
 /.vs/*
+appsettings.json
+appsettings.Development.json

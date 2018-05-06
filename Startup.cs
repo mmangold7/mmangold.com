@@ -25,8 +25,12 @@ namespace mmangold.com
         {
             services.AddMvc();
 
-            var connection = @"Server=(localdb)\mssqllocaldb;Database=EFGetStarted.AspNetCore.NewDb;Trusted_Connection=True;ConnectRetryCount=0";
-            services.AddDbContext<BloggingContext>(options => options.UseSqlServer(connection));
+            //for sqlexpress
+            //services.AddDbContext<BloggingContext>(options =>
+            //    options.UseSqlServer(Configuration.GetConnectionString("BloggingDatabase")));
+            //for postgres
+            services.AddDbContext<BloggingContext>(options =>
+                options.UseNpgsql(Configuration.GetConnectionString("BloggingDatabasePostgres")));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

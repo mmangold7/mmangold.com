@@ -26,10 +26,10 @@ namespace mmangold.com
             services.AddMvc();
 
             //for sqlexpress
-            //services.AddDbContext<BloggingContext>(options =>
+            //services.AddDbContext<SiteContext>(options =>
             //    options.UseSqlServer(Configuration.GetConnectionString("BloggingDatabase")));
             //for postgres
-            services.AddDbContext<BloggingContext>(options =>
+            services.AddDbContext<SiteContext>(options =>
                 options.UseNpgsql(Configuration.GetConnectionString("BloggingDatabasePostgres")));
         }
 

@@ -11,9 +11,9 @@ namespace mmangold.com.Controllers
 {
     public class BlogsController : Controller
     {
-        private readonly BloggingContext _context;
+        private readonly SiteContext _context;
 
-        public BlogsController(BloggingContext context)
+        public BlogsController(SiteContext context)
         {
             _context = context;
         }

@@ -6,14 +6,15 @@ using System.Collections.Generic;
 
 namespace mmangold.com.Models
 {
-    public class BloggingContext : DbContext
+    public class SiteContext : DbContext
     {
-        public BloggingContext(DbContextOptions<BloggingContext> options)
+        public SiteContext(DbContextOptions<SiteContext> options)
             : base(options)
         { }
 
         public DbSet<Blog> Blogs { get; set; }
         public DbSet<Post> Posts { get; set; }
+        public DbSet<LabeledUserImage> LabeledUserImages { get; set; }
     }
 
     public class Blog
@@ -33,4 +34,13 @@ namespace mmangold.com.Models
         public int BlogId { get; set; }
         public Blog Blog { get; set; }
     }
+
+    public class LabeledUserImage
+    {
+        public int LabeledUserImageId { get; set; }
+        public int ActualNumber { get; set; }
+        public int BestMatchNumber { get; set; }
+    }
+
+
 }

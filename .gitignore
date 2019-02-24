@@ -1,1 +1,9 @@
 /bin/*
+/apikeys.json
+/apikeys.Development.json
+/mmangold.com.csproj.user
+/obj/Debug/netcoreapp2.0
+/obj/Release/netcoreapp2.0
+/obj/mmangold.com.csproj.EntityFrameworkCore.targets
+/.vs/mmangold.com
+/.vs/config/applicationhost.config

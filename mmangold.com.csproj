@@ -2,10 +2,12 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
+    <UserSecretsId>be43cd33-0514-4289-bb63-935a33a10809</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.5" />
+    <PackageReference Include="WaniKaniApiSharp" Version="2.0.0" />
   </ItemGroup>
 
   <ItemGroup>

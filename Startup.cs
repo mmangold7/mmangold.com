@@ -43,6 +43,9 @@ namespace mmangold.com
                 routes.MapRoute(
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
+                routes.MapRoute(
+                    name: "failsafe",
+                    template: "{controller=Home}/{action=Index}/");
             });
         }
     }

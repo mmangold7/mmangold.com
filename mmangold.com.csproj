@@ -6,7 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Fitbit.Portable" Version="0.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.5" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.4" />
     <PackageReference Include="WaniKaniApiSharp" Version="2.0.0" />
   </ItemGroup>
 

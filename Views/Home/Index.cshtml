@@ -1,8 +1,11 @@
-﻿@model mmangold.com.Models.GoalsProgressModel
+﻿@model GoalsProgressModel
 
 @{
     ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "This is Matthew Mangold's personal website. It tracks my yearly goals as well as my accomplishments that I wish to make publicly available such as my progress in learning Japanese, Software Engineering, Chemistry, and achievements related to my own health.";
 }
+
+
 
 
 @*<div id="myCarousel" class="carousel slide" data-ride="carousel" data-interval="6000">
@@ -108,10 +111,93 @@
         </div>
     </div>*@
 
-<h2>2019 Goals Statuses</h2>
-<h3>Japanese</h3>
-<p></p>
-<h3>Fat Loss</h3>
-<p></p>
-<h3>Chemistry</h3>
-<p></p>
+<h1>2019 Goals Status</h1>
+<h2>Japanese</h2>
+<h3>WaniKani progress</h3>
+<p>
+    I have been learning radicals, kanji, and vocab as <strong>@Model.UserInformation.Username</strong> on WaniKani since <strong>@Model.UserInformation.CreationDate.ToString("M") @Model.UserInformation.CreationDate.Year</strong>.
+    I am currently at level <strong>@Model.UserInformation.Level out of 60</strong>.
+</p>
+<p>I should be able to identify <strong>@Model.Radicals.Count radicals</strong>.</p>
+<p>Kanji Progress</p>
+@{
+    double kanjiAboveApprentice = Model.Kanji.Count();
+    var kanjiProgress = Convert.ToInt32(Math.Floor(kanjiAboveApprentice / Model.TotalKanji * 100));
+}
+
+<div class="progress">
+    <div class="progress-bar" role="progressbar" style="width: @kanjiProgress%;" aria-valuenow="@kanjiProgress" aria-valuemin="0" aria-valuemax="100">@kanjiProgress%</div>
+    <span class="pull-right total">@Model.TotalKanji</span>
+</div>
+<div></div>
+<p>I should be able to identify these <strong>@Model.Kanji.Count kanji</strong>:</p>
+<p>
+    <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseKanji" aria-expanded="false" aria-controls="collapseExample">
+        Show Kanji
+    </button>
+</p>
+<div class="collapse" id="collapseKanji">
+    <div class="card card-body">
+        @{
+            var lastKanjiItem = Model.Kanji.Last();
+            foreach (var kanji in Model.Kanji.OrderBy(k => k.UserInfo.UnlockedDate))
+            {
+                if (kanji.Equals(lastKanjiItem))
+                {
+                    <span>@kanji.Character.</span>
+                }
+                else
+                {
+                    <span>@kanji.Character, </span>
+                }
+            }
+        }
+    </div>
+</div>
+
+<p>Vocabulary Progression</p>
+@{
+    double vocabAboveApprentice = Model.Vocabulary.Count();
+    var vocabProgress = Convert.ToInt32(Math.Floor(vocabAboveApprentice / Model.TotalVocab * 100));
+}
+
+<div class="progress">
+    <div class="progress-bar" role="progressbar" style="width: @vocabProgress%;" aria-valuenow="@vocabProgress" aria-valuemin="0" aria-valuemax="100">@vocabProgress%</div>
+    <span class="pull-right total">@Model.TotalVocab</span>
+</div>
+<div></div>
+<p>I should be able to identify these <strong>@Model.Vocabulary.Count vocabulary items</strong>:</p>
+<p>
+    <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseVocab" aria-expanded="false" aria-controls="collapseExample">
+        Show Vocabulary
+    </button>
+</p>
+<div class="collapse" id="collapseVocab">
+    <div class="card card-body">
+        @{
+            var lastVocabularyItem = Model.Vocabulary.Last();
+            foreach (var vocab in Model.Vocabulary.OrderBy(k => k.UserInfo.UnlockedDate))
+            {
+                if (vocab.Equals(lastVocabularyItem))
+                {
+                    <span>@vocab.Character.</span>
+                }
+                else
+                {
+                    <span>@vocab.Character, </span>
+                }
+            }
+        }
+    </div>
+</div>
+
+<h2>Weight Loss</h2>
+
+@{
+    var fitbitName = Model.FitBitProfileData?.DisplayName;
+    var weight = Model.FitBitProfileData?.Weight;
+}
+
+<p>Matt's fitbit profile name is @fitbitName and his last logged weight is @weight.</p>
+@*<h2>Chemistry</h2>
+    <p></p>*@

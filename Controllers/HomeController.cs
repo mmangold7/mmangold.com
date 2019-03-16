@@ -15,6 +15,8 @@ namespace mmangold.com.Controllers
 {
     public class HomeController : Controller
     {
+        private SiteDbContext _context;
+        
         private readonly FitbitAppCredentials _fitbitAppCredentials;
         private readonly FitbitClient _fitBitClient;
 
@@ -22,7 +24,7 @@ namespace mmangold.com.Controllers
         private OAuth2Helper _authenticator;
         private string _authUrl;
 
-        public HomeController(IConfiguration configuration)
+        public HomeController(IConfiguration configuration, SiteDbContext context)
         {
             //Get third party api keys from private config file
             var apiKeys = configuration.GetSection("Keys").GetChildren();
@@ -51,8 +53,8 @@ namespace mmangold.com.Controllers
             try
             {
                 goalsProgressModel.UserInformation = _waniKaniClient.GetUserInformation();
-                goalsProgressModel.LevelProgression = _waniKaniClient.GetLevelProgression();
-                goalsProgressModel.SrsDistribution = _waniKaniClient.GetSrsDistribution();
+                //goalsProgressModel.LevelProgression = _waniKaniClient.GetLevelProgression();
+                //goalsProgressModel.SrsDistribution = _waniKaniClient.GetSrsDistribution();
                 goalsProgressModel.Radicals = _waniKaniClient.GetRadicals()
                     .FindAll(r => r.UserInfo != null && r.UserInfo.SrsLevel > 0);
                 goalsProgressModel.Kanji = _waniKaniClient.GetKanji()
@@ -69,23 +71,23 @@ namespace mmangold.com.Controllers
 
             //var aria = await _fitBitClient.GetDevicesAsync();
             
-            var simpleWeights = new List<SimpleWeightLog>();
-            var yearIterator = new DateTime(2019, 1, 31);
-            while (yearIterator.Month <= DateTime.Now.Day)
-            {
-                var fitbitWeight = await _fitBitClient.GetWeightAsync(yearIterator, DateRangePeriod.OneMonth);
-                foreach (var weight in fitbitWeight.Weights)
-                    simpleWeights.Add(new SimpleWeightLog
-                    {
-                        //js months are zero indexed. sigh
-                        Date = weight.Date.AddMonths(-1),
-                        Weight = (float)(weight.Weight * 2.20462),
-                        DayOfYear = weight.Date.DayOfYear
-                    });
-                yearIterator = yearIterator.AddMonths(1);
-            }
+            //var simpleWeights = new List<SimpleWeightLog>();
+            //var yearIterator = new DateTime(2019, 1, 31);
+            //while (yearIterator.Month <= DateTime.Now.Day)
+            //{
+            //    var fitbitWeight = await _fitBitClient.GetWeightAsync(yearIterator, DateRangePeriod.OneMonth);
+            //    foreach (var weight in fitbitWeight.Weights)
+            //        simpleWeights.Add(new SimpleWeightLog
+            //        {
+            //            //js months are zero indexed. sigh
+            //            Date = weight.Date.AddMonths(-1),
+            //            Weight = (float)(weight.Weight * 2.20462),
+            //            DayOfYear = weight.Date.DayOfYear
+            //        });
+            //    yearIterator = yearIterator.AddMonths(1);
+            //}
  
-            goalsProgressModel.SimpleWeights = simpleWeights;
+            //goalsProgressModel.SimpleWeights = simpleWeights;
 
             return View(goalsProgressModel);
         }

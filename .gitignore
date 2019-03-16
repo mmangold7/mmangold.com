@@ -8,3 +8,6 @@
 /.vs/mmangold.com
 /.vs/config/applicationhost.config
 /mmangold.com.sln.DotSettings.user
+/Migrations/SiteDbContextModelSnapshot.cs
+/Migrations/20190316190519_InitialCreate.Designer.cs
+/site.db

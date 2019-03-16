@@ -17,6 +17,8 @@
 <p>I should be able to identify <strong>@Model.Radicals?.Count radicals</strong>.</p>
 <p>Kanji Progress</p>
 @{
+    Model.TotalKanji = Model.TotalKanji == 0 ? 1 : Model.TotalKanji;
+    Model.TotalVocab = Model.TotalVocab == 0 ? 1 : Model.TotalVocab;
     decimal kanjiAboveApprentice = Model.Kanji?.Count() ?? 0;
     var kanjiProgress = Convert.ToInt32(Math.Floor(kanjiAboveApprentice / Model.TotalKanji * 100));
 }
@@ -35,16 +37,19 @@
 <div class="collapse" id="collapseKanji">
     <div class="card card-body">
         @{
-            var lastKanjiItem = Model.Kanji?.Last();
-            foreach (var kanji in Model.Kanji?.OrderBy(k => k.UserInfo.UnlockedDate))
+            if (Model.Kanji != null)
             {
-                if (kanji.Equals(lastKanjiItem))
+                var lastKanjiItem = Model.Kanji?.Last();
+                foreach (var kanji in Model.Kanji?.OrderBy(k => k.UserInfo.UnlockedDate))
                 {
-                    <span>@kanji.Character.</span>
-                }
-                else
-                {
-                    <span>@kanji.Character, </span>
+                    if (kanji.Equals(lastKanjiItem))
+                    {
+                        <span>@kanji.Character.</span>
+                    }
+                    else
+                    {
+                        <span>@kanji.Character, </span>
+                    }
                 }
             }
         }
@@ -71,18 +76,21 @@
 <div class="collapse" id="collapseVocab">
     <div class="card card-body">
         @{
-            var lastVocabularyItem = Model.Vocabulary?.Last();
-            foreach (var vocab in Model.Vocabulary?.OrderBy(k => k.UserInfo.UnlockedDate))
-            {
-                if (vocab.Equals(lastVocabularyItem))
-                {
-                    <span>@vocab.Character.</span>
-                }
-                else
-                {
-                    <span>@vocab.Character, </span>
-                }
-            }
+            if (Model.Vocabulary != null)
+             {
+                 var lastVocabularyItem = Model.Vocabulary?.Last();
+                 foreach (var vocab in Model.Vocabulary?.OrderBy(k => k.UserInfo.UnlockedDate))
+                 {
+                     if (vocab.Equals(lastVocabularyItem))
+                     {
+                         <span>@vocab.Character.</span>
+                     }
+                     else
+                     {
+                         <span>@vocab.Character, </span>
+                     }
+                 }
+             }
         }
     </div>
 </div>

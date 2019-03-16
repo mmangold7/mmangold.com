@@ -111,17 +111,19 @@
         </div>
     </div>*@
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.bundle.js"></script>
+
 <h1>2019 Goals Status</h1>
 <h2>Japanese</h2>
 <h3>WaniKani progress</h3>
 <p>
-    I have been learning radicals, kanji, and vocab as <strong>@Model.UserInformation.Username</strong> on WaniKani since <strong>@Model.UserInformation.CreationDate.ToString("M") @Model.UserInformation.CreationDate.Year</strong>.
-    I am currently at level <strong>@Model.UserInformation.Level out of 60</strong>.
+    I have been learning radicals, kanji, and vocab as <strong>@Model.UserInformation?.Username</strong> on WaniKani since <strong>@Model.UserInformation?.CreationDate.ToString("M") @Model.UserInformation?.CreationDate.Year</strong>.
+    I am currently at level <strong>@Model.UserInformation?.Level out of 60</strong>.
 </p>
-<p>I should be able to identify <strong>@Model.Radicals.Count radicals</strong>.</p>
+<p>I should be able to identify <strong>@Model.Radicals?.Count radicals</strong>.</p>
 <p>Kanji Progress</p>
 @{
-    double kanjiAboveApprentice = Model.Kanji.Count();
+    decimal kanjiAboveApprentice = Model.Kanji?.Count() ?? 0;
     var kanjiProgress = Convert.ToInt32(Math.Floor(kanjiAboveApprentice / Model.TotalKanji * 100));
 }
 
@@ -130,7 +132,7 @@
     <span class="pull-right total">@Model.TotalKanji</span>
 </div>
 <div></div>
-<p>I should be able to identify these <strong>@Model.Kanji.Count kanji</strong>:</p>
+<p>I should be able to identify these <strong>@Model.Kanji?.Count kanji</strong>:</p>
 <p>
     <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseKanji" aria-expanded="false" aria-controls="collapseExample">
         Show Kanji
@@ -139,8 +141,8 @@
 <div class="collapse" id="collapseKanji">
     <div class="card card-body">
         @{
-            var lastKanjiItem = Model.Kanji.Last();
-            foreach (var kanji in Model.Kanji.OrderBy(k => k.UserInfo.UnlockedDate))
+            var lastKanjiItem = Model.Kanji?.Last();
+            foreach (var kanji in Model.Kanji?.OrderBy(k => k.UserInfo.UnlockedDate))
             {
                 if (kanji.Equals(lastKanjiItem))
                 {
@@ -157,7 +159,7 @@
 
 <p>Vocabulary Progression</p>
 @{
-    double vocabAboveApprentice = Model.Vocabulary.Count();
+    decimal vocabAboveApprentice = Model.Vocabulary?.Count() ?? 0;
     var vocabProgress = Convert.ToInt32(Math.Floor(vocabAboveApprentice / Model.TotalVocab * 100));
 }
 
@@ -166,7 +168,7 @@
     <span class="pull-right total">@Model.TotalVocab</span>
 </div>
 <div></div>
-<p>I should be able to identify these <strong>@Model.Vocabulary.Count vocabulary items</strong>:</p>
+<p>I should be able to identify these <strong>@Model.Vocabulary?.Count vocabulary items</strong>:</p>
 <p>
     <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseVocab" aria-expanded="false" aria-controls="collapseExample">
         Show Vocabulary
@@ -175,8 +177,8 @@
 <div class="collapse" id="collapseVocab">
     <div class="card card-body">
         @{
-            var lastVocabularyItem = Model.Vocabulary.Last();
-            foreach (var vocab in Model.Vocabulary.OrderBy(k => k.UserInfo.UnlockedDate))
+            var lastVocabularyItem = Model.Vocabulary?.Last();
+            foreach (var vocab in Model.Vocabulary?.OrderBy(k => k.UserInfo.UnlockedDate))
             {
                 if (vocab.Equals(lastVocabularyItem))
                 {
@@ -192,12 +194,65 @@
 </div>
 
 <h2>Weight Loss</h2>
+<div class="chart-container" style="height: 400px; position: center; width: 800px">
+    <canvas id="chartjs-0" class="chartjs" style="display: block"></canvas>
+</div>
 
-@{
-    var fitbitName = Model.FitBitProfileData?.DisplayName;
-    var weight = Model.FitBitProfileData?.Weight;
-}
+<script type="text/javascript">
+    var weightsArray = [];
+    var weightData = [];
+    var timeData = [];
 
-<p>Matt's fitbit profile name is @fitbitName and his last logged weight is @weight.</p>
-@*<h2>Chemistry</h2>
-    <p></p>*@
+    @foreach (var weight in Model.SimpleWeights)
+    {
+        @:weightsArray.push({ 'x': @weight.DayOfYear, 'y': @weight.Weight });
+
+        // @:weightsArray.push({ 'x': new Date(@weight.Date.Year, @weight.Date.Month, @weight.Date.Day, @weight.Date.Hour, @weight.Date.Minute, @weight.Date.Second), 'y': @weight.Weight });
+        // @:weightData.push(new Date(@weight.Date.Year, @weight.Date.Month, @weight.Date.Day, @weight.Date.Hour, @weight.Date.Minute, @weight.Date.Second))
+        @:timeData.push(@weight.DayOfYear);
+        @:weightData.push(@weight.Weight);
+    };
+
+    var ctx = document.getElementById("weightChart").getContext('2d');
+    var testChart = new Chart(document.getElementById("chartjs-0"),
+        {
+            "type": "line",
+            "data": {
+                "labels": timeData,
+                "datasets": [
+                    {
+                        "data": weightData,
+                        "fill": false,
+                        "borderColor": "rgb(75, 192, 192)",
+                        "lineTension": 0.1
+                    }
+                ]
+            },
+            "options": {
+                "scales": {
+                    "xAxes": [
+                        {
+                            "distribution": 'linear'
+                        }
+                    ],
+                    "yAxes": [
+                        {
+                            "ticks": {
+                                "suggestedMin": 160,
+                                "suggestedMax": 220
+                            }
+                        }
+                    ]
+                },
+            }
+        });
+    var myChart = new Chart(ctx,
+        {
+            type: 'line',
+            data: weightsArray,
+            responsive: false,
+
+        });
+    console.log(weightsArray);
+    console.log(myChart);
+</script>

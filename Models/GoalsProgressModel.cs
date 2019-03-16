@@ -16,6 +16,7 @@ namespace mmangold.com.Models
         public int TotalKanji { get; set; }
         public int TotalVocab { get; set; }
 
-        public UserProfile FitBitProfileData { get; set; }
+        public List<WeightLog> AriaWeights { get; set; }
+        public List<SimpleWeightLog> SimpleWeights { get; set; }
     }
 }

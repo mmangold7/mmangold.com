@@ -41,26 +41,7 @@ namespace mmangold.com.Controllers
             var accessToken = new OAuth2AccessToken();
             accessToken.Token = token;
             _fitBitClient = new FitbitClient(_fitbitAppCredentials, accessToken);
-            //_authenticator = new OAuth2Helper(_fitbitAppCredentials, "https://mmangold.azurewebsites.net/Home/FitBitCallBack");
-            //string[] scopes = { "profile", "settings","social","nutrition","profile","location","sleep","weight","activity","heartrate"
-            //};
-            //_authUrl = _authenticator.GenerateAuthUrl(scopes, null);
-
-
-            //var fitBitAccessToken = new OAuth2AccessToken();
-            //fitBitAccessToken.t
-            //_fitBitClient = new FitbitClient(_fitbitAppCredentials, "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIyMkRKTlQiLCJzdWIiOiI0NVQyM1ciLCJpc3MiOiJGaXRiaXQiLCJ0eXAiOiJhY2Nlc3NfdG9rZW4iLCJzY29wZXMiOiJ3aHIgd251dCB3cHJvIHdzbGUgd3dlaSB3c29jIHdzZXQgd2FjdCB3bG9jIiwiZXhwIjoxNTUyNzcxNTQ4LCJpYXQiOjE1NTIxNzYzNDF9.rdNaDt_Wemu6JiSREA8xS__b8ll40SuRDKucwTYiStY");
         }
-
-        //public async Task<ActionResult> FitBitCallBack([FromQuery(Name = "code")] string code, [FromQuery(Name = "access_token")] string token, [FromQuery(Name = "user_id")] string userId)
-        //{
-        //    //var accessToken = await _authenticator.ExchangeAuthCodeForAccessTokenAsync(code);
-        //    var accessToken = new OAuth2AccessToken();
-        //    accessToken.Token = token;
-        //    accessToken.UserId = userId;
-        //    _fitBitClient = new FitbitClient(_fitbitAppCredentials, accessToken);
-        //    return Redirect("Index");
-        //}
 
         public async Task<IActionResult> Index()
         {
@@ -115,11 +96,6 @@ namespace mmangold.com.Controllers
 
             return View();
         }
-
-        //public IActionResult FitBitAuth()
-        //{
-        //    return Redirect(_authUrl);
-        //}
 
         public IActionResult Contact()
         {

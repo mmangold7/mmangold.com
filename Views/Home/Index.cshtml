@@ -40,13 +40,12 @@
     }
 
     .h3section { margin: 15px; }
-    .h4section {
-        margin: 15px;
-    }
+
+    .h4section { margin: 15px; }
 </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.bundle.js"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/0.5.7/chartjs-plugin-annotation.js"></script>
 <h1>2019 Goals Status</h1>
 <hr/>
 <h2>Japanese</h2>
@@ -176,13 +175,45 @@
                 "datasets": [
                     {
                         "data": weightData,
-                        "fill": true,
+                        "fill": false,
                         "borderColor": "rgb(3, 3, 3)",
+                        "borderWidth": 2,
                         "lineTension": 0.1
                     }
                 ]
             },
             "options": {
+                "annotation": {
+                    "annotations": [
+                        {
+                            type: 'box',
+                            drawTime: 'beforeDatasetsDraw',
+                            id: 'a-box-1',
+                            xScaleID: 'x-axis-0',
+                            yScaleID: 'y-axis-0',
+                            yMax: 184,
+                            yMin: 137,
+                            borderColor: 'rgb(180, 180, 180)',
+                            borderWidth: 1,
+                            backgroundColor: 'rgb(220, 255, 220)'
+                        },
+                        {
+                            "type": 'line',
+                            "mode": 'horizontal',
+                            "scaleID": 'y-axis-0',
+                            "value": 160.5,
+                            "borderColor": 'rgb(220, 255, 220)',
+                            "borderWidth": 0,
+                            "label": {
+                                "enabled": true,
+                                "content": 'Healthy BMI Range',
+                                "fontSize": 25,
+                                "fontColor": 'rgb(180, 180, 180)',
+                                "backgroundColor": 'rgb(220, 255, 220)'
+                            }
+                        },
+                    ]
+                },
                 "responsive": true,
                 "elements": {
                     "point": {
@@ -212,7 +243,7 @@
                     "yAxes": [
                         {
                             "ticks": {
-                                "suggestedMin": 160,
+                                "suggestedMin": 125,
                                 "suggestedMax": 220
                             },
                             "scaleLabel": {

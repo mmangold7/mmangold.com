@@ -59,6 +59,11 @@ namespace mmangold.com.Controllers
 
         public async void GetAllGuruOrGreaterItems()
         {
+            _context.GuruOrGreaterRadicals.RemoveRange(_context.GuruOrGreaterRadicals);
+            _context.GuruOrGreaterKanjis.RemoveRange(_context.GuruOrGreaterKanjis);
+            _context.GuruOrGreaterVocabs.RemoveRange(_context.GuruOrGreaterVocabs);
+            _context.SaveChanges();
+
             var guruRadicals = new List<GuruOrGreaterRadical>();
             _waniKaniClient.GetRadicals()
                 .FindAll(r => r.UserInfo != null && r.UserInfo.SrsLevel > 0).ForEach(r =>
@@ -134,8 +139,8 @@ namespace mmangold.com.Controllers
 
 
             //initial load vs deltas
-            //if (!_context.WeightSyncs.Any())
-            //    await GetInitialFitBitWeightData(new DateTime(2019, 1, 1), DateTime.Now.AddMonths(2));
+            if (!_context.WeightSyncs.Any() || !_context.WeightSyncs.Any(s => s.SyncDate.Day == DateTime.Now.Day))
+                await GetInitialFitBitWeightData(new DateTime(2019, 1, 1), DateTime.Now.AddMonths(2));
             //else
             //    await GetInitialFitBitWeightData(_context.WeightSyncs.Max(s => s.SyncDate), DateTime.Now.AddDays(7));
 
@@ -148,6 +153,9 @@ namespace mmangold.com.Controllers
         //fix this method or passed paramters. updated weights are returning all weights in the past week from the startdate
         public async Task GetInitialFitBitWeightData(DateTime startDate, DateTime endDate)
         {
+            _context.SimpleWeightLogs.RemoveRange(_context.SimpleWeightLogs);
+            _context.SaveChanges();
+
             var simpleWeights = new List<SimpleWeightLog>();
             while (startDate <= endDate)
             {

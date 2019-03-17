@@ -20,7 +20,7 @@
     Model.TotalKanji = Model.TotalKanji == 0 ? 1 : Model.TotalKanji;
     Model.TotalVocab = Model.TotalVocab == 0 ? 1 : Model.TotalVocab;
     decimal kanjiAboveApprentice = Model.Kanji?.Count() ?? 0;
-    var kanjiProgress = Convert.ToInt32(Math.Floor(kanjiAboveApprentice / 2207 * 100));
+    var kanjiProgress = Convert.ToInt32(Math.Floor(kanjiAboveApprentice / 2027 * 100));
 }
 
 <div class="progress">
@@ -77,20 +77,20 @@
     <div class="card card-body">
         @{
             if (Model.Vocabulary != null)
-             {
-                 var lastVocabularyItem = Model.Vocabulary?.Last();
-                 foreach (var vocab in Model.Vocabulary?.OrderBy(k => k.UnlockedDate))
-                 {
-                     if (vocab.Equals(lastVocabularyItem))
-                     {
-                         <span>@vocab.Character.</span>
-                     }
-                     else
-                     {
-                         <span>@vocab.Character, </span>
-                     }
-                 }
-             }
+            {
+                var lastVocabularyItem = Model.Vocabulary?.Last();
+                foreach (var vocab in Model.Vocabulary?.OrderBy(k => k.UnlockedDate))
+                {
+                    if (vocab.Equals(lastVocabularyItem))
+                    {
+                        <span>@vocab.Character.</span>
+                    }
+                    else
+                    {
+                        <span>@vocab.Character, </span>
+                    }
+                }
+            }
         }
     </div>
 </div>
@@ -106,20 +106,19 @@
     var timeData = [];
     @if (Model.SimpleWeights != null)
     {
-        foreach (var weight in Model.SimpleWeights)
-         {
-             @:weightsArray.push({ 'x': @weight.DayOfYear, 'y': @weight.Weight });
+        foreach (var weight in Model.SimpleWeights.OrderBy(w => w.Date))
+        {
+            //@:weightsArray.push({ 'x': @weight.DayOfYear, 'y': @(weight.Weight * 2.20462)  });
 
-             // @:weightsArray.push({ 'x': new Date(@weight.Date.Year, @weight.Date.Month, @weight.Date.Day, @weight.Date.Hour, @weight.Date.Minute, @weight.Date.Second), 'y': @weight.Weight });
-             // @:weightData.push(new Date(@weight.Date.Year, @weight.Date.Month, @weight.Date.Day, @weight.Date.Hour, @weight.Date.Minute, @weight.Date.Second))
-             @:timeData.push(@weight.DayOfYear);
-             @:weightData.push(@weight.Weight);
-         }
+            // @:weightsArray.push({ 'x': new Date(@weight.Date.Year, @weight.Date.Month, @weight.Date.Day, @weight.Date.Hour, @weight.Date.Minute, @weight.Date.Second), 'y': @weight.Weight });
+            // @:weightData.push(new Date(@weight.Date.Year, @weight.Date.Month, @weight.Date.Day, @weight.Date.Hour, @weight.Date.Minute, @weight.Date.Second))
+            //@:timeData.push(@weight.DayOfYear);
+            @:timeData.push(new Date(@weight.Date.Year, @weight.Date.Month, @weight.Date.Day, @weight.Date.Hour, @weight.Date.Minute, @weight.Date.Second));
+            @:weightData.push(@weight.Weight * 2.20462);
+        }
         ;
     }
 
-
-    var ctx = document.getElementById("weightChart").getContext('2d');
     var testChart = new Chart(document.getElementById("chartjs-0"),
         {
             "type": "line",
@@ -128,17 +127,36 @@
                 "datasets": [
                     {
                         "data": weightData,
-                        "fill": false,
-                        "borderColor": "rgb(75, 192, 192)",
+                        "fill": true,
+                        "borderColor": "rgb(3, 3, 3)",
                         "lineTension": 0.1
                     }
                 ]
             },
             "options": {
+                "elements": {
+                    "point": {
+                        "radius": 0
+                    }
+                },
                 "scales": {
                     "xAxes": [
                         {
-                            "distribution": 'linear'
+                            "distribution": "linear",
+                            "type": "time",
+                            "time": {
+                                "displayFormats": {
+                                    'millisecond': 'MMM DD',
+                                    'second': 'MMM DD',
+                                    'minute': 'MMM DD',
+                                    'hour': 'MMM DD',
+                                    'day': 'MMM DD',
+                                    'week': 'MMM DD',
+                                    'month': 'MMM DD',
+                                    'quarter': 'MMM DD',
+                                    'year': 'MMM DD'
+                                }
+                            }
                         }
                     ],
                     "yAxes": [
@@ -146,19 +164,22 @@
                             "ticks": {
                                 "suggestedMin": 160,
                                 "suggestedMax": 220
+                            },
+                            "scaleLabel": {
+                                "display": true,
+                                "labelString": 'Weight in Pounds'
                             }
                         }
                     ]
+
                 },
+                "legend": {
+                    "display": false,
+                    //"legendText" : ['Current','Vs last week/month/year','% Change']
+                }
             }
         });
-    var myChart = new Chart(ctx,
-        {
-            type: 'line',
-            data: weightsArray,
-            responsive: false,
-
-        });
-    console.log(weightsArray);
-    console.log(myChart);
+    console.log(timeData);
+    console.log(weightData);
+    console.log(testChart);
 </script>

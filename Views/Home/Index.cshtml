@@ -96,7 +96,7 @@
 </div>
 
 <h2>Weight Loss</h2>
-<div class="chart-container" style="height: 400px; position: center; width: 800px">
+<div class="chart-container" style="position: relative;">
     <canvas id="chartjs-0" class="chartjs" style="display: block"></canvas>
 </div>
 
@@ -113,7 +113,7 @@
             // @:weightsArray.push({ 'x': new Date(@weight.Date.Year, @weight.Date.Month, @weight.Date.Day, @weight.Date.Hour, @weight.Date.Minute, @weight.Date.Second), 'y': @weight.Weight });
             // @:weightData.push(new Date(@weight.Date.Year, @weight.Date.Month, @weight.Date.Day, @weight.Date.Hour, @weight.Date.Minute, @weight.Date.Second))
             //@:timeData.push(@weight.DayOfYear);
-            @:timeData.push(new Date(@weight.Date.Year, @weight.Date.Month, @weight.Date.Day, @weight.Date.Hour, @weight.Date.Minute, @weight.Date.Second));
+            @:timeData.push(new Date(@weight.Date.Year, @weight.Date.Month - 1, @weight.Date.Day, @weight.Date.Hour, @weight.Date.Minute, @weight.Date.Second));
             @:weightData.push(@weight.Weight * 2.20462);
         }
         ;
@@ -134,6 +134,7 @@
                 ]
             },
             "options": {
+                "responsive": true,
                 "elements": {
                     "point": {
                         "radius": 0

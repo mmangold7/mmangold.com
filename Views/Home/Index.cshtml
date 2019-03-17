@@ -20,12 +20,12 @@
     Model.TotalKanji = Model.TotalKanji == 0 ? 1 : Model.TotalKanji;
     Model.TotalVocab = Model.TotalVocab == 0 ? 1 : Model.TotalVocab;
     decimal kanjiAboveApprentice = Model.Kanji?.Count() ?? 0;
-    var kanjiProgress = Convert.ToInt32(Math.Floor(kanjiAboveApprentice / Model.TotalKanji * 100));
+    var kanjiProgress = Convert.ToInt32(Math.Floor(kanjiAboveApprentice / 2207 * 100));
 }
 
 <div class="progress">
     <div class="progress-bar" role="progressbar" style="width: @kanjiProgress%;" aria-valuenow="@kanjiProgress" aria-valuemin="0" aria-valuemax="100">@kanjiProgress%</div>
-    <span class="pull-right total">@Model.TotalKanji</span>
+    <span class="pull-right total">2027</span>
 </div>
 <div></div>
 <p>I should be able to identify these <strong>@Model.Kanji?.Count kanji</strong>:</p>
@@ -40,7 +40,7 @@
             if (Model.Kanji != null)
             {
                 var lastKanjiItem = Model.Kanji?.Last();
-                foreach (var kanji in Model.Kanji?.OrderBy(k => k.UserInfo.UnlockedDate))
+                foreach (var kanji in Model.Kanji?.OrderBy(k => k.UnlockedDate))
                 {
                     if (kanji.Equals(lastKanjiItem))
                     {
@@ -59,12 +59,12 @@
 <p>Vocabulary Progression</p>
 @{
     decimal vocabAboveApprentice = Model.Vocabulary?.Count() ?? 0;
-    var vocabProgress = Convert.ToInt32(Math.Floor(vocabAboveApprentice / Model.TotalVocab * 100));
+    var vocabProgress = Convert.ToInt32(Math.Floor(vocabAboveApprentice / 6303 * 100));
 }
 
 <div class="progress">
     <div class="progress-bar" role="progressbar" style="width: @vocabProgress%;" aria-valuenow="@vocabProgress" aria-valuemin="0" aria-valuemax="100">@vocabProgress%</div>
-    <span class="pull-right total">@Model.TotalVocab</span>
+    <span class="pull-right total">6303</span>
 </div>
 <div></div>
 <p>I should be able to identify these <strong>@Model.Vocabulary?.Count vocabulary items</strong>:</p>
@@ -79,7 +79,7 @@
             if (Model.Vocabulary != null)
              {
                  var lastVocabularyItem = Model.Vocabulary?.Last();
-                 foreach (var vocab in Model.Vocabulary?.OrderBy(k => k.UserInfo.UnlockedDate))
+                 foreach (var vocab in Model.Vocabulary?.OrderBy(k => k.UnlockedDate))
                  {
                      if (vocab.Equals(lastVocabularyItem))
                      {

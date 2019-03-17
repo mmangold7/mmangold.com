@@ -1,13 +1,15 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Fitbit.Api.Portable;
 using Fitbit.Api.Portable.OAuth2;
+using Fitbit.Models;
 using mmangold.com.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using WaniKaniApi;
+using Activity = System.Diagnostics.Activity;
 
 namespace mmangold.com.Controllers
 {
@@ -23,6 +25,7 @@ namespace mmangold.com.Controllers
 
         public HomeController(IConfiguration configuration, SiteDbContext context)
         {
+            _context = context;
             //Get third party api keys from private config file
             var apiKeys = configuration.GetSection("Keys").GetChildren();
 
@@ -54,7 +57,7 @@ namespace mmangold.com.Controllers
         //    await _context.SaveChangesAsync();
         //}
 
-        public async void GetInitialGuruItems()
+        public async void GetAllGuruOrGreaterItems()
         {
             var guruRadicals = new List<GuruOrGreaterRadical>();
             _waniKaniClient.GetRadicals()
@@ -85,6 +88,12 @@ namespace mmangold.com.Controllers
                         UnlockedDate = r.UserInfo.UnlockedDate
                     }));
             await _context.GuruOrGreaterVocabs.AddRangeAsync(guruVocabs);
+
+            await _context.WaniKaniSyncs.AddAsync(new WaniKaniSync()
+            {
+                SyncDate = DateTime.Now
+            });
+
             await _context.SaveChangesAsync();
         }
 
@@ -92,47 +101,91 @@ namespace mmangold.com.Controllers
         {
             var goalsProgressModel = new GoalsProgressModel();
 
-            //WaniKani data
-            //try
-            //{
+            //Initial load WK data if none exists in db or no init load has been done yet this day
+            if (!_context.GuruOrGreaterRadicals.Any() || !_context.WaniKaniSyncs.Any(s => s.SyncDate.Day == DateTime.Now.Day))
+            {
+                GetAllGuruOrGreaterItems();
+            }
+            //Retrieve deltas
+
+
             goalsProgressModel.UserInformation = _waniKaniClient.GetUserInformation();
+            goalsProgressModel.Radicals = _context.GuruOrGreaterRadicals.OrderBy(r => r.UnlockedDate).ToList();
+            goalsProgressModel.Kanji = _context.GuruOrGreaterKanjis.OrderBy(k => k.UnlockedDate).ToList();
+            goalsProgressModel.Vocabulary = _context.GuruOrGreaterVocabs.OrderBy(v => v.UnlockedDate).ToList();
+
+            //These two count calls can take 5 seconds total... don't do them every time
+            //goalsProgressModel.TotalKanji = _waniKaniClient.GetKanji().Count();
+            //goalsProgressModel.TotalVocab = _waniKaniClient.GetVocabulary().Count();
+
+            //goalsProgressModel.UserInformation = _waniKaniClient.GetUserInformation();
             //goalsProgressModel.LevelProgression = _waniKaniClient.GetLevelProgression();
             //goalsProgressModel.SrsDistribution = _waniKaniClient.GetSrsDistribution();
-            goalsProgressModel.Radicals = _waniKaniClient.GetRadicals()
-                .FindAll(r => r.UserInfo != null && r.UserInfo.SrsLevel > 0);
-            goalsProgressModel.Kanji = _waniKaniClient.GetKanji()
-                .FindAll(r => r.UserInfo != null && r.UserInfo.SrsLevel > 0);
-            goalsProgressModel.Vocabulary = _waniKaniClient.GetVocabulary()
-                .FindAll(r => r.UserInfo != null && r.UserInfo.SrsLevel > 0);
+            //goalsProgressModel.Radicals = _waniKaniClient.GetRadicals()
+            //    .FindAll(r => r.UserInfo != null && r.UserInfo.SrsLevel > 0);
+            //goalsProgressModel.Kanji = _waniKaniClient.GetKanji()
+            //    .FindAll(r => r.UserInfo != null && r.UserInfo.SrsLevel > 0);
+            //goalsProgressModel.Vocabulary = _waniKaniClient.GetVocabulary()
+            //    .FindAll(r => r.UserInfo != null && r.UserInfo.SrsLevel > 0);
 
-            goalsProgressModel.TotalKanji = _waniKaniClient.GetKanji().Count;
-            goalsProgressModel.TotalVocab = _waniKaniClient.GetVocabulary().Count;
-            //}
-            //catch (Exception e)
-            //{
-            //}
+            //goalsProgressModel.TotalKanji = _waniKaniClient.GetKanji().Count;
+            //goalsProgressModel.TotalVocab = _waniKaniClient.GetVocabulary().Count;
 
-            //var aria = await _fitBitClient.GetDevicesAsync();
 
-            //var simpleWeights = new List<SimpleWeightLog>();
-            //var yearIterator = new DateTime(2019, 1, 31);
-            //while (yearIterator.Month <= DateTime.Now.Day)
-            //{
-            //    var fitbitWeight = await _fitBitClient.GetWeightAsync(yearIterator, DateRangePeriod.OneMonth);
-            //    foreach (var weight in fitbitWeight.Weights)
-            //        simpleWeights.Add(new SimpleWeightLog
-            //        {
-            //            //js months are zero indexed. sigh
-            //            Date = weight.Date.AddMonths(-1),
-            //            Weight = (float)(weight.Weight * 2.20462),
-            //            DayOfYear = weight.Date.DayOfYear
-            //        });
-            //    yearIterator = yearIterator.AddMonths(1);
-            //}
 
-            //goalsProgressModel.SimpleWeights = simpleWeights;
+            //initial load vs deltas
+            //if (!_context.WeightSyncs.Any())
+            //    await GetInitialFitBitWeightData(new DateTime(2019, 1, 1), DateTime.Now.AddMonths(2));
+            //else
+            //    await GetInitialFitBitWeightData(_context.WeightSyncs.Max(s => s.SyncDate), DateTime.Now.AddDays(7));
+
+
+            goalsProgressModel.SimpleWeights = _context.SimpleWeightLogs.OrderBy(l => l.DayOfYear).ToList();
 
             return View(goalsProgressModel);
+        }
+
+        //fix this method or passed paramters. updated weights are returning all weights in the past week from the startdate
+        public async Task GetInitialFitBitWeightData(DateTime startDate, DateTime endDate)
+        {
+            var simpleWeights = new List<SimpleWeightLog>();
+            while (startDate <= endDate)
+            {
+                var simpleWeightsForDateRange = new List<SimpleWeightLog>();
+                var weight = await _fitBitClient.GetWeightAsync(endDate, DateRangePeriod.OneWeek);
+                weight.Weights.ForEach(w => simpleWeightsForDateRange.Add(new SimpleWeightLog
+                {
+                    Weight = w.Weight,
+                    Date = w.DateTime,
+                    DayOfYear = w.DateTime.DayOfYear
+                }));
+                simpleWeights.AddRange(simpleWeightsForDateRange);
+                endDate = endDate.AddDays(-7);
+            }
+
+            try
+            {
+                await _context.SimpleWeightLogs.AddRangeAsync(simpleWeights);
+            }
+            catch (Exception e)
+            {
+                foreach (var l in simpleWeights)
+                {
+                    await _context.SimpleWeightLogs.AddAsync(l);
+                }
+            }
+            catch
+            {
+                
+            }
+
+            await _context.WeightSyncs.AddAsync(new WeightSync
+            {
+                NewRecords = simpleWeights.Count,
+                SyncDate = DateTime.Now
+            });
+
+            await _context.SaveChangesAsync();
         }
 
         public IActionResult About()

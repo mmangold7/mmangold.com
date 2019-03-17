@@ -34,8 +34,11 @@ namespace mmangold.com
                 .HasIndex(r => r.Character)
                 .IsUnique();
             builder.Entity<GuruOrGreaterVocab>()
-                .HasIndex(r => r.GetHashCode())
+                .HasIndex(r => r.Character)
                 .IsUnique();
+            //builder.Entity<SimpleWeightLog>()
+            //    .HasIndex(r => r.Date)
+            //    .IsUnique();
         }
 
         //public DbSet<WeightLogLocal> WeightLogs { get; set; }
@@ -46,6 +49,9 @@ namespace mmangold.com
         public DbSet<GuruOrGreaterKanji> GuruOrGreaterKanjis { get; set; }
         public DbSet<GuruOrGreaterVocab> GuruOrGreaterVocabs { get; set; }
         public DbSet<SimpleWeightLog> SimpleWeightLogs { get; set; }
+        public DbSet<WeightSync> WeightSyncs { get; set; }
+        public DbSet<WaniKaniSync> WaniKaniSyncs { get; set; }
+        
 
     }
 }

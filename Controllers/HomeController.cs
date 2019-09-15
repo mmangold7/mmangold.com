@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 using Fitbit.Api.Portable;
 using Fitbit.Api.Portable.OAuth2;
 using Fitbit.Models;
-using mmangold.com.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using mmangold.com.Models;
 using WaniKaniApi;
 using Activity = System.Diagnostics.Activity;
 
@@ -15,13 +15,13 @@ namespace mmangold.com.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly SiteDbContext _context;
         private readonly FitbitAppCredentials _fitbitAppCredentials;
         private readonly FitbitClient _fitBitClient;
 
         private readonly WaniKaniClient _waniKaniClient;
-        private OAuth2Helper _authenticator;
-        private string _authUrl;
-        private SiteDbContext _context;
+        //private OAuth2Helper _authenticator;
+        //private string _authUrl;
 
         public HomeController(IConfiguration configuration, SiteDbContext context)
         {
@@ -46,108 +46,69 @@ namespace mmangold.com.Controllers
             _fitBitClient = new FitbitClient(_fitbitAppCredentials, accessToken);
         }
 
-        //public async void SaveInitialWaniKaniData()
-        //{
-        //    await _context.RadicalItems.AddRangeAsync(_waniKaniClient.GetRadicals()
-        //        .FindAll(r => r.UserInfo != null && r.UserInfo.SrsLevel > 0).Cast<WaniKaniRadicalItemLocal>());
-        //    await _context.KanjiItems.AddRangeAsync(_waniKaniClient.GetKanji()
-        //        .FindAll(r => r.UserInfo != null && r.UserInfo.SrsLevel > 0).Cast<WaniKaniKanjiItemLocal>());
-        //    await _context.VocabularyItems.AddRangeAsync(_waniKaniClient.GetVocabulary()
-        //        .FindAll(r => r.UserInfo != null && r.UserInfo.SrsLevel > 0).Cast<WaniKaniVocabularyItemLocal>());
-        //    await _context.SaveChangesAsync();
-        //}
-
-        public async void GetAllGuruOrGreaterItems()
+        public async Task<JsonResult> GetProgressModel()
         {
-            _context.GuruOrGreaterRadicals.RemoveRange(_context.GuruOrGreaterRadicals);
-            _context.GuruOrGreaterKanjis.RemoveRange(_context.GuruOrGreaterKanjis);
-            _context.GuruOrGreaterVocabs.RemoveRange(_context.GuruOrGreaterVocabs);
-            _context.SaveChanges();
-
-            var guruRadicals = new List<GuruOrGreaterRadical>();
-            _waniKaniClient.GetRadicals()
-                .FindAll(r => r.UserInfo != null && r.UserInfo.SrsLevel > 0).ForEach(r =>
-                    guruRadicals.Add(new GuruOrGreaterRadical
-                    {
-                        ImageUri = r.ImageUri,
-                        UnlockedDate = r.UserInfo.UnlockedDate
-                    }));
-            await _context.GuruOrGreaterRadicals.AddRangeAsync(guruRadicals);
-
-            var guruKanjis = new List<GuruOrGreaterKanji>();
-            _waniKaniClient.GetKanji()
-                .FindAll(r => r.UserInfo != null && r.UserInfo.SrsLevel > 0).ForEach(r =>
-                    guruKanjis.Add(new GuruOrGreaterKanji
-                    {
-                        Character = r.Character,
-                        UnlockedDate = r.UserInfo.UnlockedDate
-                    }));
-            await _context.GuruOrGreaterKanjis.AddRangeAsync(guruKanjis);
-
-            var guruVocabs = new List<GuruOrGreaterVocab>();
-            _waniKaniClient.GetVocabulary()
-                .FindAll(r => r.UserInfo != null && r.UserInfo.SrsLevel > 0).ForEach(r =>
-                    guruVocabs.Add(new GuruOrGreaterVocab
-                    {
-                        Character = r.Character,
-                        UnlockedDate = r.UserInfo.UnlockedDate
-                    }));
-            await _context.GuruOrGreaterVocabs.AddRangeAsync(guruVocabs);
-
-            await _context.WaniKaniSyncs.AddAsync(new WaniKaniSync()
+            //Initial load WK data if none exists in db or no init load has been done yet this day
+            if (!_context.GuruOrGreaterRadicals.Any() ||
+                !_context.WaniKaniSyncs.Any(s => s.SyncDate.DayOfYear == DateTime.Now.DayOfYear))
             {
-                SyncDate = DateTime.Now
-            });
+                _context.GuruOrGreaterRadicals.RemoveRange(_context.GuruOrGreaterRadicals);
+                _context.GuruOrGreaterKanjis.RemoveRange(_context.GuruOrGreaterKanjis);
+                _context.GuruOrGreaterVocabs.RemoveRange(_context.GuruOrGreaterVocabs);
+                _context.SaveChanges();
 
-            await _context.SaveChangesAsync();
+                var guruRadicals = new List<GuruOrGreaterRadical>();
+                var guruKanjis = new List<GuruOrGreaterKanji>();
+                var guruVocabs = new List<GuruOrGreaterVocab>();
+
+                _waniKaniClient.GetRadicals()
+                    .FindAll(r => r.UserInfo != null && r.UserInfo.SrsLevel > 0).ForEach(r =>
+                        guruRadicals.Add(new GuruOrGreaterRadical
+                        {
+                            ImageUri = r.ImageUri,
+                            UnlockedDate = r.UserInfo.UnlockedDate
+                        }));
+                _waniKaniClient.GetKanji()
+                    .FindAll(r => r.UserInfo != null && r.UserInfo.SrsLevel > 0).ForEach(r =>
+                        guruKanjis.Add(new GuruOrGreaterKanji
+                        {
+                            Character = r.Character,
+                            UnlockedDate = r.UserInfo.UnlockedDate
+                        }));
+                _waniKaniClient.GetVocabulary()
+                    .FindAll(r => r.UserInfo != null && r.UserInfo.SrsLevel > 0).ForEach(r =>
+                        guruVocabs.Add(new GuruOrGreaterVocab
+                        {
+                            Character = r.Character,
+                            UnlockedDate = r.UserInfo.UnlockedDate
+                        }));
+
+                await _context.GuruOrGreaterRadicals.AddRangeAsync(guruRadicals);
+                await _context.GuruOrGreaterKanjis.AddRangeAsync(guruKanjis);
+                await _context.GuruOrGreaterVocabs.AddRangeAsync(guruVocabs);
+                await _context.LevelProgresses.AddAsync(new LevelProgress
+                    {Level = _waniKaniClient.GetUserInformation().Level.ToString(), CreatedDateTime = DateTime.Now});
+
+                await _context.WaniKaniSyncs.AddAsync(new WaniKaniSync
+                {
+                    SyncDate = DateTime.Now
+                });
+
+                _context.SaveChanges();
+            }
+
+            return Json(new GoalsProgressModel
+            {
+                Radicals = _context.GuruOrGreaterRadicals.OrderBy(i => i.UnlockedDate).ToList(),
+                Kanji = _context.GuruOrGreaterKanjis.OrderBy(i => i.UnlockedDate).ToList(),
+                Vocabulary = _context.GuruOrGreaterVocabs.OrderBy(i => i.UnlockedDate).ToList(),
+                Level = _context.LevelProgresses.OrderByDescending(mi => mi.CreatedDateTime).First().Level
+            });
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            var goalsProgressModel = new GoalsProgressModel();
-
-            //Initial load WK data if none exists in db or no init load has been done yet this day
-            if (!_context.GuruOrGreaterRadicals.Any() || !_context.WaniKaniSyncs.Any(s => s.SyncDate.Day == DateTime.Now.Day))
-            {
-                GetAllGuruOrGreaterItems();
-            }
-            //Retrieve deltas
-
-
-            goalsProgressModel.UserInformation = _waniKaniClient.GetUserInformation();
-            goalsProgressModel.Radicals = _context.GuruOrGreaterRadicals.OrderBy(r => r.UnlockedDate).ToList();
-            goalsProgressModel.Kanji = _context.GuruOrGreaterKanjis.OrderBy(k => k.UnlockedDate).ToList();
-            goalsProgressModel.Vocabulary = _context.GuruOrGreaterVocabs.OrderBy(v => v.UnlockedDate).ToList();
-
-            //These two count calls can take 5 seconds total... don't do them every time
-            //goalsProgressModel.TotalKanji = _waniKaniClient.GetKanji().Count();
-            //goalsProgressModel.TotalVocab = _waniKaniClient.GetVocabulary().Count();
-
-            //goalsProgressModel.UserInformation = _waniKaniClient.GetUserInformation();
-            //goalsProgressModel.LevelProgression = _waniKaniClient.GetLevelProgression();
-            //goalsProgressModel.SrsDistribution = _waniKaniClient.GetSrsDistribution();
-            //goalsProgressModel.Radicals = _waniKaniClient.GetRadicals()
-            //    .FindAll(r => r.UserInfo != null && r.UserInfo.SrsLevel > 0);
-            //goalsProgressModel.Kanji = _waniKaniClient.GetKanji()
-            //    .FindAll(r => r.UserInfo != null && r.UserInfo.SrsLevel > 0);
-            //goalsProgressModel.Vocabulary = _waniKaniClient.GetVocabulary()
-            //    .FindAll(r => r.UserInfo != null && r.UserInfo.SrsLevel > 0);
-
-            //goalsProgressModel.TotalKanji = _waniKaniClient.GetKanji().Count;
-            //goalsProgressModel.TotalVocab = _waniKaniClient.GetVocabulary().Count;
-
-
-
-            //initial load vs deltas
-            if (!_context.WeightSyncs.Any() || !_context.WeightSyncs.Any(s => s.SyncDate.Day == DateTime.Now.Day))
-                await GetInitialFitBitWeightData(new DateTime(2019, 1, 1), DateTime.Now.AddMonths(2));
-            //else
-            //    await GetInitialFitBitWeightData(_context.WeightSyncs.Max(s => s.SyncDate), DateTime.Now.AddDays(7));
-
-
-            goalsProgressModel.SimpleWeights = _context.SimpleWeightLogs.OrderBy(l => l.DayOfYear).ToList();
-
-            return View(goalsProgressModel);
+            return View();
         }
 
         //fix this method or passed paramters. updated weights are returning all weights in the past week from the startdate
@@ -175,16 +136,9 @@ namespace mmangold.com.Controllers
             {
                 await _context.SimpleWeightLogs.AddRangeAsync(simpleWeights);
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                foreach (var l in simpleWeights)
-                {
-                    await _context.SimpleWeightLogs.AddAsync(l);
-                }
-            }
-            catch
-            {
-                
+                foreach (var l in simpleWeights) await _context.SimpleWeightLogs.AddAsync(l);
             }
 
             await _context.WeightSyncs.AddAsync(new WeightSync

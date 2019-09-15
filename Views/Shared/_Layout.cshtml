@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="@ViewData["MetaDescription"]"/>
+    <meta name="description" content="@ViewData["MetaDescription"]" />
     <title>@ViewData["Title"] - mmangold.com</title>
 
     <environment include="Development">
@@ -16,6 +16,7 @@
               asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
         <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
     </environment>
+    @RenderSection("Styles", required: false)
 </head>
 <body>
     <nav class="navbar navbar-inverse navbar-fixed-top">

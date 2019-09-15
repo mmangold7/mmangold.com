@@ -51,7 +51,7 @@
         </div>
     </div>
 </div>
-<hr/>
+<div id="loading" class="loading style-2"><div class="loading-wheel"></div></div>
 
 @section Scripts {
 
@@ -65,7 +65,6 @@
                 type: 'POST',
                 url: '@Url.Action("GetProgressModel")',
                 success: function (data) {
-                    console.log(data);
                     var vm = ko.mapping.fromJS(data);
                     vm.kanjiPercent = ko.pureComputed(function() {
                         return Math.floor(vm.kanji().length / 2027 * 100)+'%';
@@ -74,6 +73,7 @@
                         return Math.floor(vm.vocabulary().length / 6303 * 100)+'%';
                     }, vm);
                     ko.applyBindings(vm);
+                    $('#loading').remove();
                 }
             });
         });
@@ -82,7 +82,7 @@
 }
 
 @section Styles {
-    @*<link rel="stylesheet" type="text/css" href="~/css/skeleton.scss"/>*@
+    <link rel="stylesheet" type="text/css" href="~/css/loading.css"/>
     <style>
         .btn, .progress-bar {
             background-color: red !important;
